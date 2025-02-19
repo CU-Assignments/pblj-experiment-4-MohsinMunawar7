@@ -1,0 +1,106 @@
+.Develop a ticket booking system with synchronized threads to ensure no double booking of seats. Use thread priorities to simulate VIP bookings being processed first.
+import java.util.*;
+
+class TicketBookingSystem {
+    private final int totalSeats;
+    private final Set<Integer> bookedSeats;
+    private final Object lock = new Object(); // For synchronization
+
+    public TicketBookingSystem(int totalSeats) {
+        this.totalSeats = totalSeats;
+        this.bookedSeats = new HashSet<>();
+    }
+
+    // Method to book a seat
+    public boolean bookSeat(int seatNumber, String userType) {
+        synchronized (lock) {
+            if (bookedSeats.contains(seatNumber)) {
+                System.out.println("Seat " + seatNumber + " is already booked.");
+                return false;
+            } else {
+                bookedSeats.add(seatNumber);
+                System.out.println("Seat " + seatNumber + " booked by " + userType + " user.");
+                return true;
+            }
+        }
+    }
+
+    // Method to display available seats
+    public void displayAvailableSeats() {
+        synchronized (lock) {
+            System.out.println("Available seats: ");
+            for (int i = 1; i <= totalSeats; i++) {
+                if (!bookedSeats.contains(i)) {
+                    System.out.print(i + " ");
+                }
+            }
+            System.out.println();
+        }
+    }
+}
+
+class BookingThread extends Thread {
+    private final TicketBookingSystem bookingSystem;
+    private final int seatNumber;
+    private final String userType;
+
+    public BookingThread(TicketBookingSystem bookingSystem, int seatNumber, String userType) {
+        this.bookingSystem = bookingSystem;
+        this.seatNumber = seatNumber;
+        this.userType = userType;
+    }
+
+    @Override
+    public void run() {
+        bookingSystem.bookSeat(seatNumber, userType);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        TicketBookingSystem bookingSystem = new TicketBookingSystem(10); // 10 seats available
+
+        // Display initial available seats
+        bookingSystem.displayAvailableSeats();
+
+        // Create threads for bookings
+        BookingThread vip1 = new BookingThread(bookingSystem, 1, "VIP");
+        BookingThread vip2 = new BookingThread(bookingSystem, 2, "VIP");
+        BookingThread regular1 = new BookingThread(bookingSystem, 3, "Regular");
+        BookingThread regular2 = new BookingThread(bookingSystem, 4, "Regular");
+
+        // Set thread priorities (VIP threads have higher priority)
+        vip1.setPriority(Thread.MAX_PRIORITY);
+        vip2.setPriority(Thread.MAX_PRIORITY);
+        regular1.setPriority(Thread.NORM_PRIORITY);
+        regular2.setPriority(Thread.NORM_PRIORITY);
+
+        // Start the threads
+        vip1.start();
+        regular1.start();
+        vip2.start();
+        regular2.start();
+
+        // Wait for all threads to finish
+        try {
+            vip1.join();
+            vip2.join();
+            regular1.join();
+            regular2.join();
+        } catch (InterruptedException e) {
+            System.out.println("Thread interrupted: " + e.getMessage());
+        }
+
+        // Display final available seats
+        bookingSystem.displayAvailableSeats();
+    }
+}
+OUTPUT
+Available seats: 
+1 2 3 4 5 6 7 8 9 10 
+Seat 1 booked by VIP user.
+Seat 2 booked by VIP user.
+Seat 3 booked by Regular user.
+Seat 4 booked by Regular user.
+Available seats: 
+5 6 7 8 9 10 
