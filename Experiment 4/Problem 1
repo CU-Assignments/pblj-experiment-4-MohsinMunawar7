@@ -1,0 +1,70 @@
+1. Create a program to collect and store all the cards to assist the users in finding all the cards in a given symbol using Collection interface.
+import java.util.*;
+
+class Card {
+    private String symbol;
+    private String value;
+
+    public Card(String symbol, String value) {
+        this.symbol = symbol;
+        this.value = value;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return value + " of " + symbol;
+    }
+}
+
+public class CardCollection {
+    public static void main(String[] args) {
+        // Create a map to store cards by their symbol
+        Map<String, List<Card>> cardMap = new HashMap<>();
+
+        // Add some cards to the collection
+        addCard(cardMap, new Card("Hearts", "Ace"));
+        addCard(cardMap, new Card("Hearts", "King"));
+        addCard(cardMap, new Card("Spades", "Queen"));
+        addCard(cardMap, new Card("Diamonds", "10"));
+        addCard(cardMap, new Card("Hearts", "2"));
+        addCard(cardMap, new Card("Spades", "7"));
+
+        // Allow the user to search for cards by symbol
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter a symbol to find cards (e.g., Hearts, Spades): ");
+        String symbol = scanner.nextLine();
+
+        // Retrieve and display cards for the given symbol
+        List<Card> cards = cardMap.get(symbol);
+        if (cards != null && !cards.isEmpty()) {
+            System.out.println("Cards with symbol " + symbol + ":");
+            for (Card card : cards) {
+                System.out.println(card);
+            }
+        } else {
+            System.out.println("No cards found with symbol " + symbol);
+        }
+
+        scanner.close();
+    }
+
+    // Helper method to add a card to the map
+    private static void addCard(Map<String, List<Card>> cardMap, Card card) {
+        String symbol = card.getSymbol();
+        cardMap.computeIfAbsent(symbol, k -> new ArrayList<>()).add(card);
+    }
+}
+output.
+Enter a symbol to find cards (e.g., Hearts, Spades): Hearts
+Cards with symbol Hearts:
+Ace of Hearts
+King of Hearts
+2 of Hearts
